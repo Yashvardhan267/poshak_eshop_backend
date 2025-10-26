@@ -4,16 +4,22 @@ import crypto from "crypto";
 export const createOrder = async (req, res) => {
   try {
     const { amount, currency = "INR" } = req.body;
+    if (!razorpayInstance) {
+      return res.status(200).json({
+        message: "Razorpay disabled. Mock payment created successfully.",
+        mockOrderId: `mock_${Date.now()}`,
+      });
+    }
 
     const options = {
-      amount: amount * 100, // amount in paise
+      amount: amount * 100, // amount in the smallest currency unit (paise)
       currency,
       receipt: `receipt_${Date.now()}`,
     };
 
     const order = await razorpayInstance.orders.create(options);
 
-    res.json({
+    res.status(200).json({
       success: true,
       orderId: order.id,
       currency: order.currency,
